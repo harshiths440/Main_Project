@@ -1,0 +1,24 @@
+# Virtual environment
+deepfake_venv/
+env/
+venv/
+.env
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# IDEs
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Project specific (from deepfake_project/.gitignore)
+*.pth
+*.pt
+deepfake_project/data/*
+!deepfake_project/data/.gitkeep

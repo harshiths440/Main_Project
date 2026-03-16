@@ -1,0 +1,6 @@
+__pycache__/
+*.pth
+*.pt
+data/*
+!data/.gitkeep
+.DS_Store
