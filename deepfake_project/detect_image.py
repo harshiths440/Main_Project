@@ -4,6 +4,8 @@ from facenet_pytorch import MTCNN
 from torchvision import transforms
 from PIL import Image
 from efficientnet_pytorch import EfficientNet
+from models.model import DeepfakeDetector
+import torch.nn.functional as F
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -23,6 +25,10 @@ model._fc = nn.Linear(model._fc.in_features, 1)
 model = model.to(device)
 model.eval()
 
+model = DeepfakeDetector()
+model.load_state_dict(torch.load("models/deepfake_model.pth", map_location=device))
+model.to(device)
+model.eval()
 # -----------------------------
 # Image Transform
 # -----------------------------
@@ -48,21 +54,21 @@ boxes, _ = mtcnn.detect(image)
 
 if boxes is not None:
     print(f"Detected {len(boxes)} face(s)")
-    
-    for box in boxes:
+
+    for i, box in enumerate(boxes):
         x1, y1, x2, y2 = [int(b) for b in box]
         face = image.crop((x1, y1, x2, y2))
-        
+
         face_tensor = transform(face).unsqueeze(0).to(device)
 
         with torch.no_grad():
             output = model(face_tensor)
-            probability = torch.sigmoid(output)
-            confidence = probability.item()
+            prob = torch.sigmoid(output).item()
 
-        label = "FAKE" if confidence > 0.5 else "REAL"
-        
-        print(f"Prediction: {label} (confidence: {confidence:.4f})")
+            if prob > 0.5:
+                print(f"Prediction: FAKE ({prob:.4f})")
+            else:
+                print(f"Prediction: REAL ({1 - prob:.4f})")
 
 else:
     print("No face detected")
